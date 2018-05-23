@@ -10,6 +10,20 @@ Consularis will only work against Consul 0.7.x + as it relies on Key/Value Trans
 By default Consularis will assume it's running inside Kubernetes and tries to grab configuration from the cluster.
 Run `./consularis -h` for details on how to run it outside Kubernetes.
 
+## Build & Development
+To build Consularis you first need to make sure you have all the dependencies.
+```
+brew install dep
+brew upgrade dep
+dep ensure
+```
+To build it, run `go build`.
+
+If you make any changes to the specs under `pkg/apis/consularis.io/*` you need to re-generate the code.
+```
+hack/update-codegen.sh
+```
+
 ## Kubernetes Custom Resource Definitions
 Consularis manages Consul Key/Values using [Custom Resource Definitions](https://kubernetes.io/docs/concepts/api-extension/custom-resources/) (CRD).
 At startup time Consularis will create the CRD if it does not already exist. 
@@ -56,3 +70,4 @@ The Keys and Values are arbitrary as long as you follow YAML spec and it also su
 
 ## TODO
 - [ ] Give a nicer error message if you run Consularis outside of Kubernetes without flags.
+- [ ] Create basic example Dockerfile
