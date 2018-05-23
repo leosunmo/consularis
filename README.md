@@ -23,8 +23,8 @@ The ConsulObjects CRD supports all the regular kubectl API interactions.
 | kubectl cmd | Result |
 | -------- | -------- |
 | `kubectl get consulobjects` &#124; `co`  | Lists all ConsulObjects |
-| `kubectl describe co my-fixture` | Describes the object and lists the Key/Values it manages |
 | `kubectl apply -f /path/to/my-kv.yaml` | Will create or update the Key/Values `my-kv` manages |
+| `kubectl describe co my-kv` | Describes the object and lists the Key/Values it manages |
 | `kubectl delete -f my-kv.yaml` &#124; `kubectl delete consulobject my-kv` | Deletes an object using the file that was used to create it or directly by referencing the API object |
 
 > Note that `kubectl describe` will try to do some fancy "pretty yaml" formatting that can break when you have "\n" characters in the `value`. To get around that you can use `kubectl get co my-kv -o json` to output `my-kv` in JSON format instead which preserves the original `value`.
