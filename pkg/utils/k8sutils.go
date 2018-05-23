@@ -46,9 +46,9 @@ func GetCRDClient(conf *config.Config) *clientset.Clientset {
 		log.WithError(err).Fatal("Error building kubeconfig")
 	}
 
-	fixtureClient, err := clientset.NewForConfig(cfg)
+	ConsulObjectClient, err := clientset.NewForConfig(cfg)
 	if err != nil {
 		log.WithError(err).Fatal("Error building ConsulObject clientset")
 	}
-	return fixtureClient
+	return ConsulObjectClient
 }

@@ -39,11 +39,11 @@ const (
 // Controller is the controller implementation for Employee resources
 type Controller struct {
 	// sampleclientset is a clientset for our own API group
-	fixturesclientset clientset.Interface
+	cObjectsclientset clientset.Interface
 
-	fixturesLister listers.ConsulObjectLister
+	cObjectsLister listers.ConsulObjectLister
 
-	fixturesSynced cache.InformerSynced
+	cObjectsSynced cache.InformerSynced
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
@@ -64,13 +64,13 @@ func Run(conf *config.Config) {
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
 
-	fixtureClient := utils.GetCRDClient(conf)
+	cObjectClient := utils.GetCRDClient(conf)
 
-	fixturesInformerFactory := informers.NewSharedInformerFactory(fixtureClient, time.Second*30)
+	cObjectsInformerFactory := informers.NewSharedInformerFactory(cObjectClient, time.Second*30)
 
-	controller := NewController(fixtureClient, fixturesInformerFactory, conf)
+	controller := NewController(cObjectClient, cObjectsInformerFactory, conf)
 
-	go fixturesInformerFactory.Start(stopCh)
+	go cObjectsInformerFactory.Start(stopCh)
 
 	if err := controller.Run(2, stopCh); err != nil {
 		log.WithError(err).Fatal("Error running controller")
@@ -115,29 +115,29 @@ func CreateCRD(clientset apiextensionsclientset.Interface) (*apiextv1beta1.Custo
 
 // NewController returns a new sample controller
 func NewController(
-	fixturesclientset clientset.Interface,
-	fixturesInformerFactory informers.SharedInformerFactory,
+	cObjectsclientset clientset.Interface,
+	cObjectsInformerFactory informers.SharedInformerFactory,
 	conf *config.Config) *Controller {
 
 	// obtain references to shared index informers for the ConsulObjects type.
-	fixturesInformer := fixturesInformerFactory.Consularis().V1alpha1().ConsulObjects()
+	cObjectsInformer := cObjectsInformerFactory.Consularis().V1alpha1().ConsulObjects()
 
 	controller := &Controller{
-		fixturesclientset: fixturesclientset,
-		fixturesLister:    fixturesInformer.Lister(),
-		fixturesSynced:    fixturesInformer.Informer().HasSynced,
+		cObjectsclientset: cObjectsclientset,
+		cObjectsLister:    cObjectsInformer.Lister(),
+		cObjectsSynced:    cObjectsInformer.Informer().HasSynced,
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "consulobjects"),
 		conf:              conf,
 	}
 
 	log.Info("Setting up event handlers")
 	// Set up an event handler for when ConsulObjects resources change
-	fixturesInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: controller.enqueueFixture,
+	cObjectsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: controller.enqueueConsulObject,
 		UpdateFunc: func(old, new interface{}) {
-			controller.enqueueFixture(new)
+			controller.enqueueConsulObject(new)
 		},
-		DeleteFunc: controller.enqueueFixture,
+		DeleteFunc: controller.enqueueConsulObject,
 	})
 	return controller
 }
@@ -155,7 +155,7 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 
 	// Wait for the caches to be synced before starting workers
 	log.Info("Waiting for informer caches to sync")
-	if ok := cache.WaitForCacheSync(stopCh, c.fixturesSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.cObjectsSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
@@ -212,7 +212,7 @@ func (c *Controller) processNextWorkItem() bool {
 			return nil
 		}
 		// Run the syncHandler, passing it the namespace/name string of the
-		// Fixture resource to be synced.
+		// ConsulObject resource to be synced.
 		if err := c.syncHandler(obj); err != nil {
 			return fmt.Errorf("error syncing '%s': %s", object.GetName(), err.Error())
 		}
@@ -274,9 +274,9 @@ func (c *Controller) syncHandler(obj interface{}) error {
 	// Create the consul client after we're sure we've got the object
 	consulClient, err := consul.NewClient(c.conf)
 	// Get the ConsulObjects resource with this namespace/name from API server
-	fixture, err := c.fixturesLister.ConsulObjects(namespace).Get(name)
+	cObject, err := c.cObjectsLister.ConsulObjects(namespace).Get(name)
 	if err != nil {
-		// The fixture resource may no longer exist, in which case we stop
+		// The ConsulObject resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
 			err := consul.KVDelete(consulClient, object)
@@ -290,7 +290,7 @@ func (c *Controller) syncHandler(obj interface{}) error {
 	}
 
 	// Update consul KV with new values. Either new KV or updating existing KV
-	err = consul.KVUpdate(consulClient, fixture)
+	err = consul.KVUpdate(consulClient, cObject)
 	if err != nil {
 		runtime.HandleError(fmt.Errorf("Failed to update KV: %s", err))
 	}
@@ -302,9 +302,9 @@ func (c *Controller) syncHandler(obj interface{}) error {
 		return err
 	}
 
-	// Finally, we update the status block of the Consul Fixture resource to reflect
+	// Finally, we update the status block of the ConsulObject resource to reflect
 	// the processed/synced state.
-	//err = c.updateFixtureStatus(fixture)
+	//err = c.updateObjectStatus(cObject)
 	//if err != nil {
 	//	return err
 	//}
@@ -312,9 +312,9 @@ func (c *Controller) syncHandler(obj interface{}) error {
 	return nil
 }
 
-// enqueueFixture takes a ConsulObject resource and converts it into a namespace/name
+// enqueueConsulObject takes a ConsulObject resource and converts it into a namespace/name
 // string which is then put onto the work queue. This method should *not* be
 // passed resources of any type other than ConsulObject.
-func (c *Controller) enqueueFixture(obj interface{}) {
+func (c *Controller) enqueueConsulObject(obj interface{}) {
 	c.workqueue.AddRateLimited(obj)
 }

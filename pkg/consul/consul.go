@@ -25,15 +25,15 @@ func NewClient(conf *config.Config) (*consulapi.KV, error) {
 	return kv, nil
 }
 
-// KVUpdate will update the consul KV with the fixture KV
-func KVUpdate(client *consulapi.KV, fixture *consularisv1alpha1.ConsulObject) error {
+// KVUpdate will update the consul KV with the ConsulObject KV
+func KVUpdate(client *consulapi.KV, object *consularisv1alpha1.ConsulObject) error {
 	// p := &consulapi.KVPair{Key: "testkey1", Value: []byte("testvalue1")}
 	// _, err := client.Put(p, nil)
 	// if err != nil {
 	// 	fmt.Printf("test put err: %s", err.Error())
 	// }
 	var ctxns consulapi.KVTxnOps
-	kvs := *fixture.Spec.KV
+	kvs := *object.Spec.KV
 	for _, kv := range kvs {
 		var f uint64
 		f = 0
@@ -59,10 +59,10 @@ func KVUpdate(client *consulapi.KV, fixture *consularisv1alpha1.ConsulObject) er
 
 }
 
-// KVDelete will delete the consul KV if the fixture resource is deleted
-func KVDelete(client *consulapi.KV, fixture *consularisv1alpha1.ConsulObject) error {
+// KVDelete will delete the consul KV if the ConsulObject resource is deleted
+func KVDelete(client *consulapi.KV, object *consularisv1alpha1.ConsulObject) error {
 	var ctxns consulapi.KVTxnOps
-	kvs := *fixture.Spec.KV
+	kvs := *object.Spec.KV
 	for _, kv := range kvs {
 		ctxns = append(ctxns, &consulapi.KVTxnOp{
 			Verb: consulapi.KVDelete,
