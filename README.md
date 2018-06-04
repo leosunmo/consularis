@@ -12,6 +12,14 @@ Consularis will only work against Consul 0.7.x + as it relies on Key/Value Trans
 By default Consularis will assume it's running inside Kubernetes and tries to grab configuration from the cluster.
 Run `./consularis -h` for details on how to run it outside Kubernetes.
 
+## Docker image
+Docker images are available at Dockerhub.
+```
+docker pull leosunmo/consularis:master
+```
+## Kubernetes deployment
+Example deployment files are available under the `kube` directory.
+
 ## Build & Development
 To build Consularis you first need to make sure you have all the dependencies.
 ```
@@ -20,6 +28,11 @@ brew upgrade dep
 dep ensure
 ```
 To build it, run `go build`.
+
+If you make changes to the code you need to verify that the codegen isn't broken or has changed.
+```
+hack/verify-codegen.sh
+```
 
 If you make any changes to the specs under `pkg/apis/consularis.io/*` you need to re-generate the code.
 ```
@@ -72,4 +85,5 @@ The Keys and Values are arbitrary as long as you follow YAML spec and it also su
 
 ## TODO
 - [ ] Give a nicer error message if you run Consularis outside of Kubernetes without flags.
-- [ ] Create basic example Dockerfile
+- [ ] Create basic example Kubernetes deployment
+- [x] Create proper CI with pullable docker image

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consularis
+  namespace: example
+spec:
+  selector:
+    matchLabels:
+      app: consularis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: consularis
+    spec:
+      serviceAccountName: consularis
+      containers:
+      - image: leosunmo/consularis:master
+        command:
+        - ./consularis
+        - "-n" # -n restricts Consularis to only watch ConsulObjects in the provided namespace. Empty means all namespaces.
+        - "example"
+        imagePullPolicy: IfNotPresent
+        name: consularis
+      restartPolicy: Always
+
