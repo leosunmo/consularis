@@ -2,6 +2,8 @@
 
 *Consul Key/Value controller for Kubernetes*
 
+[![Build Status](https://travis-ci.org/leosunmo/consularis.svg?branch=master)](https://travis-ci.org/leosunmo/consularis)
+
 Consularis implements a Consul Object custom resource in Kubernetes containing one or more Key/Value pairs as well as a controller for that resource.
 This enables you to use Kubernetes API objects to set the KV state in Consul.
 
