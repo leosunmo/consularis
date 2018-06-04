@@ -36,7 +36,7 @@ const (
 	FullCRDName  string = CRDPlural + "." + CRDGroup
 )
 
-// Controller is the controller implementation for Employee resources
+// Controller is the controller implementation for ConsulObjects resources
 type Controller struct {
 	// sampleclientset is a clientset for our own API group
 	cObjectsclientset clientset.Interface
@@ -151,7 +151,7 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer c.workqueue.ShutDown()
 
 	// Start the informer factories to begin populating the informer caches
-	log.Info("Starting Archduke controller")
+	log.Info("Starting Consularis controller")
 
 	// Wait for the caches to be synced before starting workers
 	log.Info("Waiting for informer caches to sync")
@@ -235,7 +235,7 @@ func (c *Controller) processNextWorkItem() bool {
 }
 
 // syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the Employee resource
+// converge the two. It then updates the Status block of the ConsulObject resource
 // with the current status of the resource.
 func (c *Controller) syncHandler(obj interface{}) error {
 	var object *consularisv1alpha1.ConsulObject
