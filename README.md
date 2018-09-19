@@ -85,5 +85,5 @@ The Keys and Values are arbitrary as long as you follow YAML spec and it also su
 
 ## TODO
 - [ ] Give a nicer error message if you run Consularis outside of Kubernetes without flags.
-- [ ] Create basic example Kubernetes deployment
+- [x] Create basic example Kubernetes deployment
 - [x] Create proper CI with pullable docker image
